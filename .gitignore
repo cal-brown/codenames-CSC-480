@@ -4,7 +4,7 @@ glove.6B.50d.txt
 glove.6B.100d.txt
 glove.6B.200d.txt
 test.py
-*.ipynb
+#*.ipynb
 results/
 
 # Byte-compiled / optimized / DLL files
