@@ -101,7 +101,7 @@ def generateAllMatchups():
     for cm1 in codemasters:
         g1 = cm_guessers[cm1]
         for cm2 in codemasters:
-            if cm1 != cm2 and g1 != "guesser_glove":
+            if cm1 != cm2:
                 g2 = cm_guessers[cm2]
                 matchups.append([(cm1, g1),(cm2, g2)])
     return matchups
