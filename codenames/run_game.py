@@ -93,11 +93,12 @@ class GameRun:
 
 def generateAllMatchups():
     matchups = []
-    codemasters = ["codemaster_glove_03","codemaster_glove_05","codemaster_glove_07",\
-               "codemaster_w2v_03","codemaster_w2v_05","codemaster_w2v_07"]
-    cm_guessers = {"codemaster_glove_03":"guesser_glove","codemaster_glove_05":"guesser_glove",\
-               "codemaster_glove_07":"guesser_glove","codemaster_w2v_03":"guesser_w2v",\
-               "codemaster_w2v_05":"guesser_w2v","codemaster_w2v_07":"guesser_w2v"}
+    codemasters = ["codemaster_glove_07","codemaster_w2v_07",\
+                   "codemaster_glove_07_adversary","codemaster_w2v_07_adversary"]
+    cm_guessers = {"codemaster_glove_07":"guesser_glove",\
+                   "codemaster_glove_07_adversary":"guesser_glove",\
+                   "codemaster_w2v_07":"guesser_w2v",\
+                   "codemaster_w2v_07_adversary":"guesser_w2v"}
     for cm1 in codemasters:
         g1 = cm_guessers[cm1]
         for cm2 in codemasters:
