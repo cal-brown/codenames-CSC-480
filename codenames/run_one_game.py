@@ -8,6 +8,8 @@ from game import Game
 from players.guesser import *
 from players.codemaster import *
 
+TWO_PLAYER = True
+
 class GameRun:
     """Class that builds and runs a Game based on command line arguments"""
 
@@ -15,13 +17,22 @@ class GameRun:
         parser = argparse.ArgumentParser(
             description="Run the Codenames AI competition game.",
             formatter_class=argparse.ArgumentDefaultsHelpFormatter)
-
+        if TWO_PLAYER:
+            parser.add_argument("red_codemaster", help="import string of form A.B.C.MyClass or 'human'")
+            parser.add_argument("red_guesser", help="import string of form A.B.C.MyClass or 'human'")
+            parser.add_argument("blue_codemaster", help="import string of form A.B.C.MyClass or 'human'")
+            parser.add_argument("blue_guesser", help="import string of form A.B.C.MyClass or 'human'")
+        else:
+            parser.add_argument("codemaster", help="import string of form A.B.C.MyClass or 'human'")
+            parser.add_argument("guesser", help="import string of form A.B.C.MyClass or 'human'")
         parser.add_argument("--seed", help="Random seed value for board state -- integer or 'time'", default='time')
+
         parser.add_argument("--w2v", help="Path to w2v file or None", default=None)
         parser.add_argument("--glove", help="Path to glove file or None", default=None)
         parser.add_argument("--wordnet", help="Name of wordnet file or None, most like ic-brown.dat", default=None)
         parser.add_argument("--glove_cm", help="Path to glove file or None", default=None)
         parser.add_argument("--glove_guesser", help="Path to glove file or None", default=None)
+
         parser.add_argument("--no_log", help="Supress logging", action='store_true', default=False)
         parser.add_argument("--no_print", help="Supress printing", action='store_true', default=False)
         parser.add_argument("--game_name", help="Name of game in log", default="default")
@@ -37,6 +48,30 @@ class GameRun:
 
         self.g_kwargs = {}
         self.cm_kwargs = {}
+
+        # load codemaster class
+        if TWO_PLAYER:
+            self.red_codemaster = self.import_string_to_class(args.red_codemaster)
+            self.red_guesser = self.import_string_to_class(args.red_guesser)
+            self.blue_codemaster = self.import_string_to_class(args.blue_codemaster)
+            self.blue_guesser = self.import_string_to_class(args.blue_guesser)
+            print(f'Red CM: {args.red_codemaster} BLUE CM: {args.blue_codemaster}')
+            print(f'RED G: {args.red_guesser} BLUE G {args.blue_guesser}')
+        else:
+            if args.codemaster == "human":
+                self.codemaster = HumanCodemaster
+                print('human codemaster')
+            else:
+                self.codemaster = self.import_string_to_class(args.codemaster)
+                print('loaded codemaster class')
+
+            # load guesser class
+            if args.guesser == "human":
+                self.guesser = HumanGuesser
+                print('human guesser')
+            else:
+                self.guesser = self.import_string_to_class(args.guesser)
+                print('loaded guesser class')
 
         # if the game is going to have an ai, load up word vectors
         if sys.argv[1] != "human" or sys.argv[2] != "human":
@@ -91,51 +126,29 @@ class GameRun:
 
         return my_class
 
-def generateAllMatchups():
-    matchups = []
-    codemasters = ["codemaster_glove_07","codemaster_w2v_07",\
-                   "codemaster_glove_07_adversary","codemaster_w2v_07_adversary"]
-    cm_guessers = {"codemaster_glove_07":"guesser_glove",\
-                   "codemaster_glove_07_adversary":"guesser_glove",\
-                   "codemaster_w2v_07":"guesser_w2v",\
-                   "codemaster_w2v_07_adversary":"guesser_w2v"}
-    for cm1 in codemasters:
-        g1 = cm_guessers[cm1]
-        for cm2 in codemasters:
-            if cm1 != cm2:
-                g2 = cm_guessers[cm2]
-                matchups.append([(cm1, g1),(cm2, g2)])
-    return matchups
 
-def runAllSimulatedGames():
-    reps = input("Enter how many times you want to simulate all matchups: ")
-    print("Simulating all matchups " + reps + " times")
-
-    matchups = generateAllMatchups()
+if __name__ == "__main__":
     game_setup = GameRun()
 
-    for rep in range(int(reps)):
-        for matchup in matchups:
-            red = matchup[0]
-            blue = matchup[1]
-            cm1 = red[0]
-            g1 = red[1]
-            cm2 = blue[0]
-            g2 = blue[1]
-            seed = time.time()
-            print(f'Red CM: {cm1} BLUE CM: {cm2}')
-            print(f'RED G: {g1} BLUE G {g2}')
-            game = Game(game_setup.import_string_to_class(f"players.{cm1}.AICodemaster"),
-                    game_setup.import_string_to_class(f"players.{g1}.AIGuesser"),
-                    game_setup.import_string_to_class(f"players.{cm2}.AICodemaster"),
-                    game_setup.import_string_to_class(f"players.{g2}.AIGuesser"),
-                    seed=seed,
+    if TWO_PLAYER:
+            game = Game(game_setup.red_codemaster,
+                    game_setup.red_guesser,
+                    game_setup.blue_codemaster,
+                    game_setup.blue_guesser,
+                    seed=game_setup.seed,
                     do_print=game_setup.do_print,
                     do_log=game_setup.do_log,
                     game_name=game_setup.game_name,
                     cm_kwargs=game_setup.cm_kwargs,
                     g_kwargs=game_setup.g_kwargs)
-            game.run()
+    else:
+        game = Game(game_setup.codemaster,
+                    game_setup.guesser,
+                    seed=game_setup.seed,
+                    do_print=game_setup.do_print,
+                    do_log=game_setup.do_log,
+                    game_name=game_setup.game_name,
+                    cm_kwargs=game_setup.cm_kwargs,
+                    g_kwargs=game_setup.g_kwargs)
 
-if __name__ == "__main__":
-    runAllSimulatedGames()
+    game.run()
