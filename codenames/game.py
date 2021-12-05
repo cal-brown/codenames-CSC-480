@@ -202,7 +202,7 @@ class Game:
 
         elif self.key_grid[guess_index] == other:
             self.words_on_board[guess_index] = f"*{other}*"
-            if self.words_on_board.count(f"*{other}*") >= (7 if color == "red" else 8):
+            if self.words_on_board.count(f"*{other}*") >= (7 if color == "Red" else 8):
                 return GameCondition.LOSS
             else:
                 return GameCondition.CONTINUE
