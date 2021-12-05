@@ -8,8 +8,6 @@ from game import Game
 from players.guesser import *
 from players.codemaster import *
 
-TWO_PLAYER = True
-
 class GameRun:
     """Class that builds and runs a Game based on command line arguments"""
 
